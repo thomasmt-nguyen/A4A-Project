@@ -138,3 +138,4 @@ class ScoutAgent(Agent):
             action = Action.MOVE_FORWARD
 
         return action
+

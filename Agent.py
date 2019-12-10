@@ -133,14 +133,14 @@ class Agent:
         if action == Action.TURN_LEFT:
             new_x_coordinate = abs(self.dropped_payload_coordinates[Y_COORDINATE])
             new_y_coordinate = abs(self.dropped_payload_coordinates[X_COORDINATE])
-            if self.dropped_payload_coordinates[X_COORDINATE] >= 0 and self.dropped_payload_coordinates[Y_COORDINATE] > 0:
-                new_x_coordinate *= -1
-            elif self.dropped_payload_coordinates[X_COORDINATE] < 0 and self.dropped_payload_coordinates[Y_COORDINATE] > 0:
+            if self.dropped_payload_coordinates[X_COORDINATE] > 0 and self.dropped_payload_coordinates[Y_COORDINATE] >= 0:
+                new_y_coordinate *= -1
+            elif self.dropped_payload_coordinates[X_COORDINATE] <= 0 and self.dropped_payload_coordinates[Y_COORDINATE] > 0:
                 new_y_coordinate *= 1
                 new_x_coordinate *= 1
-            elif self.dropped_payload_coordinates[X_COORDINATE] <= 0 and self.dropped_payload_coordinates[Y_COORDINATE] < 0:
-                new_y_coordinate *= -1
-            elif self.dropped_payload_coordinates[X_COORDINATE] > 0 and self.dropped_payload_coordinates[Y_COORDINATE] < 0:
+            elif self.dropped_payload_coordinates[X_COORDINATE] < 0 and self.dropped_payload_coordinates[Y_COORDINATE] <= 0:
+                new_x_coordinate *= -1
+            elif self.dropped_payload_coordinates[X_COORDINATE] >= 0 and self.dropped_payload_coordinates[Y_COORDINATE] < 0:
                 new_y_coordinate *= -1
                 new_x_coordinate *= -1
             else:
@@ -151,12 +151,12 @@ class Agent:
             new_y_coordinate = abs(self.dropped_payload_coordinates[X_COORDINATE])
             if self.dropped_payload_coordinates[X_COORDINATE] >= 0 and self.dropped_payload_coordinates[Y_COORDINATE] > 0:
                 new_x_coordinate *= -1
-            elif self.dropped_payload_coordinates[X_COORDINATE] > 0 and self.dropped_payload_coordinates[Y_COORDINATE] < 0:
+            elif self.dropped_payload_coordinates[X_COORDINATE] > 0 and self.dropped_payload_coordinates[Y_COORDINATE] <= 0:
                 new_y_coordinate *= 1
                 new_x_coordinate *= 1
             elif self.dropped_payload_coordinates[X_COORDINATE] <= 0 and self.dropped_payload_coordinates[Y_COORDINATE] < 0:
                 new_y_coordinate *= -1
-            elif self.dropped_payload_coordinates[X_COORDINATE] < 0 and self.dropped_payload_coordinates[Y_COORDINATE] > 0:
+            elif self.dropped_payload_coordinates[X_COORDINATE] < 0 and self.dropped_payload_coordinates[Y_COORDINATE] >= 0:
                 new_y_coordinate *= -1
                 new_x_coordinate *= -1
             else:
