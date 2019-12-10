@@ -10,7 +10,7 @@ proxy = SimluationProxy("HW2");
 #HW1_agent1 = Agent(proxy, agent_id=0)
 
 agent1 = ScoutAgent(proxy, agent_id=0)
-agent2 = HomeAgent(proxy, agent_id=1)
+agent2 = AssistantAgent(proxy, agent_id=1)
 agent3 = HomeAgent(proxy, agent_id=2)
 agent4 = HomeAgent(proxy, agent_id=3)
 agent5 = HomeAgent(proxy, agent_id=4)
@@ -33,7 +33,7 @@ proxy.step()'''
 while True:
     agent1.do_stuff()
     agent2.do_stuff()
-    agent3.action(Action.IDLE)
+    agent3.do_stuff()
     agent4.action(Action.IDLE)
     agent5.action(Action.IDLE)
     response = proxy.step()

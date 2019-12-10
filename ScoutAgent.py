@@ -17,14 +17,9 @@ AGENT_SCAN_DISTANCE = 1
 
 class ScoutAgent(Agent):
     def __init__(self, proxy, agent_id):
-        self.proxy = proxy
-        self.agent_id = agent_id
+        Agent.__init__(self, proxy, agent_id)
         self.state = AgentState.SEARCH_PAYLOAD
         self.saved_state = AgentState.SEARCH_PAYLOAD
-        self.avoid_state = AvoidState.CALCULATE
-        self.saved_avoid_action = Action.IDLE
-        self.home_coordinates = ()
-        self.dropped_payload_coordinates = ()
 
     def do_stuff(self):
 
@@ -46,10 +41,7 @@ class ScoutAgent(Agent):
                 self.state = AgentState.SEARCH_PAYLOAD
             else:
                 coordinates = self.get_closest_payload_coordinates(response)
-                print(f'closest payload coordinate: {coordinates}')
-                print(f'dropped payload coordinate: {self.dropped_payload_coordinates}')
                 action = self.calculate_action(response, coordinates)
-                print(f'return action: {action}')
                 if action == Action.COMPLETE:
                     action = Action.PICK_UP
                     self.state = AgentState.SEARCH_AGENT
@@ -80,7 +72,6 @@ class ScoutAgent(Agent):
                 if action == Action.COMPLETE:
                     action = Action.DROP
                     self.dropped_payload_coordinates = DIRECTLY_IN_FRONT
-                    print(f' just dropped: {self.dropped_payload_coordinates}')
                     self.state = AgentState.SEARCH_PAYLOAD
                 elif action == Action.AVOID_OBJECT:
                     action = action.IDLE
@@ -98,8 +89,8 @@ class ScoutAgent(Agent):
 
         if self.dropped_payload_coordinates:
             self.update_last_dropped_package_coordinates(action)
-        print(f"Scout agent : {self.state}")
-        print(f"Scout agent : {action}")
+        #print(f"Scout agent : {self.state}")
+        #print(f"Scout agent : {action}")
         self.action(action)
 
     def calculate_move_to_agent_action(self, response, coordinates):
@@ -112,9 +103,10 @@ class ScoutAgent(Agent):
             action = Action.TURN_LEFT
         else:
             within_range = [IN_FRONT, CORNER_RIGHT, CORNER_LEFT]
-
-            if coordinates in within_range:
+            if coordinates in within_range and self.get_target_agent_ready_status(response):
                 action = Action.COMPLETE
+            elif coordinates in within_range and not self.get_target_agent_ready_status(response):
+                action = Action.IDLE
             elif coordinates[X_COORDINATE] == 0 and coordinates[Y_COORDINATE] < 0 and not self.has_object_at_coordinate(response, DIRECTLY_LEFT):
                 action = Action.TURN_LEFT
             # Payload left of right of agent or behind
@@ -133,15 +125,6 @@ class ScoutAgent(Agent):
 
         return action
 
-    def get_target_agent_coordinates(self, response):
-        data = json.loads(response.text)
-        agents = data['agentData']['Scan']['Agents']
-
-        for agent in agents:
-            agent_status = self.read_mode(agent['Status'])
-            if agent_status.agent_id == self.agent_id + 1:
-                return tuple(agent['Loc'])
-
     def calculate_search_for_agent_action(self, response):
         if self.has_target_agent_coordinates(response):
             action = Action.COMPLETE
@@ -155,18 +138,3 @@ class ScoutAgent(Agent):
             action = Action.MOVE_FORWARD
 
         return action
-
-    def has_target_agent_coordinates(self, response):
-
-        if not self.has_agent_coordinates(response):
-            return False
-
-        data = json.loads(response.text)
-        agents = data['agentData']['Scan']['Agents']
-
-        for agent in agents:
-            agent_status = self.read_mode(agent['Status'])
-            if agent_status.agent_id == self.agent_id + 1:
-                return True
-
-        return False

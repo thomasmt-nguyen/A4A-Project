@@ -17,14 +17,9 @@ AGENT_SCAN_DISTANCE = 1
 class HomeAgent(Agent):
 
     def __init__(self, proxy, agent_id):
-        self.proxy = proxy
-        self.agent_id = agent_id
+        Agent.__init__(self, proxy, agent_id)
         self.state = AgentState.SEARCH_HOME
         self.saved_state = AgentState.SEARCH_HOME
-        self.avoid_state = AvoidState.TURN
-        self.saved_avoid_action = Action.IDLE
-        self.home_coordinates = ()
-        self.dropped_payload_coordinates = ()
 
     def do_stuff(self):
         response = self.proxy.agent_status(agent_id=self.agent_id)
@@ -69,6 +64,16 @@ class HomeAgent(Agent):
                     action = Action.PICK_UP
                     print("picked up package")
                     self.state = AgentState.SEARCH_HOME
+                elif action == Action.AVOID_OBJECT:
+                    action = action.IDLE
+                    self.saved_state = self.state
+                    self.state = AgentState.AVOID_OBJECT
+
+        elif self.state == AgentState.AVOID_OBJECT:
+            action = self.calculate_avoid_object_action(response)
+            if action == Action.COMPLETE:
+                action = action.IDLE
+                self.state = self.saved_state
         else:
             print("Error: No State")
             action = Action.IDLE
@@ -86,7 +91,7 @@ class HomeAgent(Agent):
                 action = Action.COMPLETE
             # Payload in front or behind agent
             # Payload left of right of agent or behind
-            elif coordinates[X_COORDINATE] > 0:
+            elif coordinates[X_COORDINATE] >= 0:
                 action = Action.TURN_RIGHT
             elif coordinates[X_COORDINATE] < 0:
                 action = Action.TURN_LEFT

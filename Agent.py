@@ -25,6 +25,7 @@ class Agent:
         self.saved_avoid_action = Action.IDLE
         self.home_coordinates = ()
         self.dropped_payload_coordinates = ()
+        self.in_position = False
 
     def do_stuff(self):
 
@@ -92,41 +93,44 @@ class Agent:
     def update_home_coordinates(self, action):
 
         if action == Action.TURN_LEFT:
-            print(f"Old Home Coordinates: {self.home_coordinates}")
             new_x_coordinate = abs(self.home_coordinates[Y_COORDINATE])
             new_y_coordinate = abs(self.home_coordinates[X_COORDINATE])
             if self.home_coordinates[X_COORDINATE] >= 0 and self.home_coordinates[Y_COORDINATE] > 0:
                 new_x_coordinate *= -1
             elif self.home_coordinates[X_COORDINATE] < 0 and self.home_coordinates[Y_COORDINATE] > 0:
-                new_y_coordinate *= -1
+                new_y_coordinate *= 1
+                new_x_coordinate *= 1
             elif self.home_coordinates[X_COORDINATE] <= 0 and self.home_coordinates[Y_COORDINATE] < 0:
                 new_x_coordinate *= -1
             elif self.home_coordinates[X_COORDINATE] > 0 and self.home_coordinates[Y_COORDINATE] < 0:
                 new_y_coordinate *= -1
+                new_x_coordinate *= -1
             self.home_coordinates = (new_x_coordinate, new_y_coordinate)
         elif action == Action.TURN_RIGHT:
-            print(f"Old Home Coordinates: {self.home_coordinates}")
             new_x_coordinate = abs(self.home_coordinates[Y_COORDINATE])
             new_y_coordinate = abs(self.home_coordinates[X_COORDINATE])
-            if self.home_coordinates[X_COORDINATE] > 0 and self.home_coordinates[Y_COORDINATE] >= 0:
+            if self.home_coordinates[X_COORDINATE] >= 0 and self.home_coordinates[Y_COORDINATE] > 0:
                 new_y_coordinate *= -1
             elif self.home_coordinates[X_COORDINATE] > 0 and self.home_coordinates[Y_COORDINATE] < 0:
-                new_x_coordinate *= -1
-            elif self.home_coordinates[X_COORDINATE] < 0 and self.home_coordinates[Y_COORDINATE] <= 0:
+                new_y_coordinate *= 1
+                new_x_coordinate *= 1
+            elif self.home_coordinates[X_COORDINATE] <= 0 and self.home_coordinates[Y_COORDINATE] < 0:
                 new_y_coordinate *= -1
             elif self.home_coordinates[X_COORDINATE] < 0 and self.home_coordinates[Y_COORDINATE] > 0:
+                new_y_coordinate *= -1
                 new_x_coordinate *= -1
             self.home_coordinates = (new_x_coordinate, new_y_coordinate)
         elif action == Action.MOVE_FORWARD:
             new_y_coordinate = self.home_coordinates[Y_COORDINATE] - 1
             new_x_coordinate = self.home_coordinates[X_COORDINATE]
             self.home_coordinates = (new_x_coordinate, new_y_coordinate)
-        print(f"New Home Coordinates: {self.home_coordinates}")
 
     def update_last_dropped_package_coordinates(self, action):
 
+        if self.agent_id == 1:
+            print(f"Old dropped payload : {self.dropped_payload_coordinates}")
+
         if action == Action.TURN_LEFT:
-            print(f"Last Held Package Coordinates: {self.dropped_payload_coordinates}")
             new_x_coordinate = abs(self.dropped_payload_coordinates[Y_COORDINATE])
             new_y_coordinate = abs(self.dropped_payload_coordinates[X_COORDINATE])
             if self.dropped_payload_coordinates[X_COORDINATE] >= 0 and self.dropped_payload_coordinates[Y_COORDINATE] > 0:
@@ -135,13 +139,14 @@ class Agent:
                 new_y_coordinate *= 1
                 new_x_coordinate *= 1
             elif self.dropped_payload_coordinates[X_COORDINATE] <= 0 and self.dropped_payload_coordinates[Y_COORDINATE] < 0:
-                new_x_coordinate *= -1
+                new_y_coordinate *= -1
             elif self.dropped_payload_coordinates[X_COORDINATE] > 0 and self.dropped_payload_coordinates[Y_COORDINATE] < 0:
                 new_y_coordinate *= -1
                 new_x_coordinate *= -1
+            else:
+                print("Error: No rotation")
             self.dropped_payload_coordinates = (new_x_coordinate, new_y_coordinate)
         elif action == Action.TURN_RIGHT:
-            print(f"Old Dropped Coordinates: {self.dropped_payload_coordinates}")
             new_x_coordinate = abs(self.dropped_payload_coordinates[Y_COORDINATE])
             new_y_coordinate = abs(self.dropped_payload_coordinates[X_COORDINATE])
             if self.dropped_payload_coordinates[X_COORDINATE] >= 0 and self.dropped_payload_coordinates[Y_COORDINATE] > 0:
@@ -150,16 +155,25 @@ class Agent:
                 new_y_coordinate *= 1
                 new_x_coordinate *= 1
             elif self.dropped_payload_coordinates[X_COORDINATE] <= 0 and self.dropped_payload_coordinates[Y_COORDINATE] < 0:
-                new_x_coordinate *= -1
+                new_y_coordinate *= -1
             elif self.dropped_payload_coordinates[X_COORDINATE] < 0 and self.dropped_payload_coordinates[Y_COORDINATE] > 0:
                 new_y_coordinate *= -1
                 new_x_coordinate *= -1
+            else:
+                print("Error: No rotation")
+
             self.dropped_payload_coordinates = (new_x_coordinate, new_y_coordinate)
         elif action == Action.MOVE_FORWARD:
+            if self.agent_id == 1:
+                print(f"###Assistant agent : {self.state}")
+                print(f"###Assistant agent : {action}")
+                print(f"Moving Forward : {self.dropped_payload_coordinates}")
             new_y_coordinate = self.dropped_payload_coordinates[Y_COORDINATE] - 1
             new_x_coordinate = self.dropped_payload_coordinates[X_COORDINATE]
             self.dropped_payload_coordinates = (new_x_coordinate, new_y_coordinate)
-        print(f"New Dropped Coordinates: {self.dropped_payload_coordinates}")
+
+        if self.agent_id == 1:
+            print(f"New dropped payload : {self.dropped_payload_coordinates}")
 
     def has_payload(self, response):
         data = json.loads(response.text)
@@ -183,6 +197,21 @@ class Agent:
         else:
             return False
 
+    def has_target_agent_coordinates(self, response):
+
+        if not self.has_agent_coordinates(response):
+            return False
+
+        data = json.loads(response.text)
+        agents = data['agentData']['Scan']['Agents']
+
+        for agent in agents:
+            agent_status = self.read_mode(agent['Status'])
+            if agent_status.agent_id == self.agent_id + 1:
+                return True
+
+        return False
+
     def create_agent_dictionary(self, response):
         data = json.loads(response.text)
         agents = data['agentData']['Scan']['Agents']
@@ -200,6 +229,24 @@ class Agent:
             agent_list.append(agent['Loc'])
 
         return agent_list
+
+    def get_target_agent_coordinates(self, response):
+        data = json.loads(response.text)
+        agents = data['agentData']['Scan']['Agents']
+
+        for agent in agents:
+            agent_status = self.read_mode(agent['Status'])
+            if agent_status.agent_id == self.agent_id + 1:
+                return tuple(agent['Loc'])
+
+    def get_target_agent_ready_status(self, response):
+        data = json.loads(response.text)
+        agents = data['agentData']['Scan']['Agents']
+
+        for agent in agents:
+            agent_status = self.read_mode(agent['Status'])
+            if agent_status.agent_id == self.agent_id + 1:
+                return agent_status.agent_in_position
 
     def has_agent_coordinates(self, response):
         data = json.loads(response.text)
@@ -355,6 +402,7 @@ class Agent:
     def calculate_return_home_action(self, response, coordinates):
         if coordinates == DIRECTLY_IN_FRONT:
             action = Action.COMPLETE
+            self.in_position = True
         elif coordinates[X_COORDINATE] == 0 and coordinates[Y_COORDINATE] < 0:
             action = Action.TURN_LEFT
         # Payload left of right of agent or behind
@@ -386,13 +434,14 @@ class Agent:
         self.proxy.agent_action(agent_id=self.agent_id, action=action.action_value, mode=mode)
 
     def write_mode(self, action):
-        mode = action.bit | (self.agent_id << 3)
+        mode = action.bit | (self.agent_id << 3) | (self.in_position << 6)
         return mode
 
     def read_mode(self, mode):
         agent_state = mode & 7
         agent_id = mode >> 3 & 7
-        agent_status = AgentStatus(agent_id = agent_id, agent_state=agent_state)
+        agent_in_position = mode >> 6 & 1
+        agent_status = AgentStatus(agent_id = agent_id, agent_state=agent_state, agent_in_position=agent_in_position)
         return agent_status
 
     def get_closest_payload_coordinates(self, response):
@@ -583,6 +632,7 @@ class Agent:
 
 
 class AgentStatus:
-    def __init__(self, agent_id, agent_state):
+    def __init__(self, agent_id, agent_state, agent_in_position):
         self.agent_id = agent_id
         self.agent_state = agent_state
+        self.agent_in_position = agent_in_position
