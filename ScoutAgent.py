@@ -29,7 +29,6 @@ class ScoutAgent(Agent):
     def do_stuff(self):
 
         response = self.proxy.agent_status(agent_id=self.agent_id)
-        print(response.json())
 
         if self.state == AgentState.SEARCH_PAYLOAD:
             action = self.calculate_search_payload_action(response)
@@ -42,7 +41,7 @@ class ScoutAgent(Agent):
                 self.state = AgentState.AVOID_OBJECT
 
         elif self.state == AgentState.RETRIEVE_PAYLOAD:
-            if not self.has_payload_coordinates(response):
+            if not self.has_new_payload_coordinates(response):
                 action = Action.IDLE
                 self.state = AgentState.SEARCH_PAYLOAD
             else:

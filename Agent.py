@@ -132,11 +132,13 @@ class Agent:
             if self.dropped_payload_coordinates[X_COORDINATE] >= 0 and self.dropped_payload_coordinates[Y_COORDINATE] > 0:
                 new_x_coordinate *= -1
             elif self.dropped_payload_coordinates[X_COORDINATE] < 0 and self.dropped_payload_coordinates[Y_COORDINATE] > 0:
-                new_y_coordinate *= -1
+                new_y_coordinate *= 1
+                new_x_coordinate *= 1
             elif self.dropped_payload_coordinates[X_COORDINATE] <= 0 and self.dropped_payload_coordinates[Y_COORDINATE] < 0:
                 new_x_coordinate *= -1
             elif self.dropped_payload_coordinates[X_COORDINATE] > 0 and self.dropped_payload_coordinates[Y_COORDINATE] < 0:
                 new_y_coordinate *= -1
+                new_x_coordinate *= -1
             self.dropped_payload_coordinates = (new_x_coordinate, new_y_coordinate)
         elif action == Action.TURN_RIGHT:
             print(f"Old Dropped Coordinates: {self.dropped_payload_coordinates}")
@@ -145,11 +147,13 @@ class Agent:
             if self.dropped_payload_coordinates[X_COORDINATE] >= 0 and self.dropped_payload_coordinates[Y_COORDINATE] > 0:
                 new_x_coordinate *= -1
             elif self.dropped_payload_coordinates[X_COORDINATE] > 0 and self.dropped_payload_coordinates[Y_COORDINATE] < 0:
-                new_y_coordinate *= -1
+                new_y_coordinate *= 1
+                new_x_coordinate *= 1
             elif self.dropped_payload_coordinates[X_COORDINATE] <= 0 and self.dropped_payload_coordinates[Y_COORDINATE] < 0:
                 new_x_coordinate *= -1
             elif self.dropped_payload_coordinates[X_COORDINATE] < 0 and self.dropped_payload_coordinates[Y_COORDINATE] > 0:
                 new_y_coordinate *= -1
+                new_x_coordinate *= -1
             self.dropped_payload_coordinates = (new_x_coordinate, new_y_coordinate)
         elif action == Action.MOVE_FORWARD:
             new_y_coordinate = self.dropped_payload_coordinates[Y_COORDINATE] - 1
@@ -159,7 +163,6 @@ class Agent:
 
     def has_payload(self, response):
         data = json.loads(response.text)
-        print(data['agentData']['Status']['Payload'])
         return data['agentData']['Status']['Payload'] != 'None'
 
     def calculate_avoid_agent_action(self, response):
@@ -437,6 +440,10 @@ class Agent:
 
     def has_payload_coordinates(self, response):
         data = json.loads(response.text)
+        return data['agentData']['Scan']['Payloads']
+
+    def has_new_payload_coordinates(self, response):
+        data = json.loads(response.text)
         if data['agentData']['Scan']['Payloads']:
             coordinates = self.get_payload_coordinates(response)
             if self.dropped_payload_coordinates in coordinates:
@@ -469,6 +476,8 @@ class Agent:
             return True
         else:
             return self.has_object_at_coordinate(response, DIRECTLY_IN_FRONT)'''
+
+        has_object = self.has_object_at_coordinate(response, DIRECTLY_IN_FRONT)
         return self.has_object_at_coordinate(response, DIRECTLY_IN_FRONT)
 
     def has_possible_agent_collision(self, response):

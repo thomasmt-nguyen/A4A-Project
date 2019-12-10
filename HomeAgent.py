@@ -28,7 +28,6 @@ class HomeAgent(Agent):
 
     def do_stuff(self):
         response = self.proxy.agent_status(agent_id=self.agent_id)
-        print(response.json())
 
         if self.state == AgentState.SEARCH_HOME:
             action = self.calculate_search_home_action(response)
@@ -74,8 +73,8 @@ class HomeAgent(Agent):
             print("Error: No State")
             action = Action.IDLE
 
-        print(f"Home agent : {self.state}")
-        print(f"Home agent : {action}")
+        #print(f"Home agent : {self.state}")
+        #print(f"Home agent : {action}")
 
         self.action(action)
 
