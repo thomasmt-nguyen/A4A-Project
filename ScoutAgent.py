@@ -1,7 +1,7 @@
 from Action import Action
 from Agent import Agent
 from AgentState import AgentState
-from AvoidState import AvoidState
+from SavedCoordinate import SavedCoordinate
 import json
 
 X_COORDINATE = 0
@@ -62,7 +62,7 @@ class ScoutAgent(Agent):
 
 
         elif self.state == AgentState.MOVE_TO_AGENT:
-            if not self.has_agent_coordinates(response):
+            if not self.has_target_agent_coordinates(response):
                 action = Action.IDLE
                 self.state = AgentState.SEARCH_AGENT
             else:
@@ -72,6 +72,10 @@ class ScoutAgent(Agent):
                 if action == Action.COMPLETE:
                     action = Action.DROP
                     self.dropped_payload_coordinates = DIRECTLY_IN_FRONT
+                    # Add home coordinates
+                    print(f'{self.dropped_payload_coordinates}')
+                    saved_coordinate = SavedCoordinate(DIRECTLY_IN_FRONT, "DROPPED")
+                    self.saved_coordinates.append(saved_coordinate)
                     self.state = AgentState.SEARCH_PAYLOAD
                 elif action == Action.AVOID_OBJECT:
                     action = action.IDLE
@@ -88,7 +92,15 @@ class ScoutAgent(Agent):
             #self.update_home_coordinates(action)
 
         if self.dropped_payload_coordinates:
+
             self.update_last_dropped_package_coordinates(action)
+            x = self.dropped_payload_coordinates[0]
+            y = self.dropped_payload_coordinates[1]
+            print(f'Old Saved Coordinate: {x}, {y}')
+
+            for saved_coordinate in self.saved_coordinates:
+                saved_coordinate.update(action)
+                #print(f'Saved Coordinate: {saved_coordinate.x}, {saved_coordinate.y}')
         #print(f"Scout agent : {self.state}")
         #print(f"Scout agent : {action}")
         self.action(action)
@@ -138,4 +150,5 @@ class ScoutAgent(Agent):
             action = Action.MOVE_FORWARD
 
         return action
+
 

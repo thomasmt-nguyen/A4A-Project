@@ -25,11 +25,12 @@ class Agent:
         self.saved_avoid_action = Action.IDLE
         self.home_coordinates = ()
         self.dropped_payload_coordinates = ()
+        self.saved_coordinates = list()
         self.in_position = False
 
     def do_stuff(self):
 
-        response = self.proxy.agent_status(agent_id=self.agent_id)
+        response = self.proxy.agent_status(self.agent_id)
 
         if self.state == AgentState.SEARCH_PAYLOAD:
             action = self.calculate_search_payload_action(response)
@@ -95,40 +96,43 @@ class Agent:
         if action == Action.TURN_LEFT:
             new_x_coordinate = abs(self.home_coordinates[Y_COORDINATE])
             new_y_coordinate = abs(self.home_coordinates[X_COORDINATE])
-            if self.home_coordinates[X_COORDINATE] >= 0 and self.home_coordinates[Y_COORDINATE] > 0:
-                new_x_coordinate *= -1
-            elif self.home_coordinates[X_COORDINATE] < 0 and self.home_coordinates[Y_COORDINATE] > 0:
+            if self.home_coordinates[X_COORDINATE] > 0 and self.home_coordinates[Y_COORDINATE] >= 0:
+                new_y_coordinate *= -1
+            elif self.home_coordinates[X_COORDINATE] <= 0 and self.home_coordinates[Y_COORDINATE] > 0:
                 new_y_coordinate *= 1
                 new_x_coordinate *= 1
-            elif self.home_coordinates[X_COORDINATE] <= 0 and self.home_coordinates[Y_COORDINATE] < 0:
+            elif self.home_coordinates[X_COORDINATE] < 0 and self.home_coordinates[Y_COORDINATE] <= 0:
                 new_x_coordinate *= -1
-            elif self.home_coordinates[X_COORDINATE] > 0 and self.home_coordinates[Y_COORDINATE] < 0:
+            elif self.home_coordinates[X_COORDINATE] >= 0 and self.home_coordinates[Y_COORDINATE] < 0:
                 new_y_coordinate *= -1
                 new_x_coordinate *= -1
-            self.home_coordinates = (new_x_coordinate, new_y_coordinate)
+            else:
+                print("Error: No rotation")
+            self.dropped_payload_coordinates = (new_x_coordinate, new_y_coordinate)
+
         elif action == Action.TURN_RIGHT:
             new_x_coordinate = abs(self.home_coordinates[Y_COORDINATE])
             new_y_coordinate = abs(self.home_coordinates[X_COORDINATE])
             if self.home_coordinates[X_COORDINATE] >= 0 and self.home_coordinates[Y_COORDINATE] > 0:
-                new_y_coordinate *= -1
-            elif self.home_coordinates[X_COORDINATE] > 0 and self.home_coordinates[Y_COORDINATE] < 0:
+                new_x_coordinate *= -1
+            elif self.home_coordinates[X_COORDINATE] > 0 and self.home_coordinates[Y_COORDINATE] <= 0:
                 new_y_coordinate *= 1
                 new_x_coordinate *= 1
             elif self.home_coordinates[X_COORDINATE] <= 0 and self.home_coordinates[Y_COORDINATE] < 0:
                 new_y_coordinate *= -1
-            elif self.home_coordinates[X_COORDINATE] < 0 and self.home_coordinates[Y_COORDINATE] > 0:
+            elif self.home_coordinates[X_COORDINATE] < 0 and self.home_coordinates[Y_COORDINATE] >= 0:
                 new_y_coordinate *= -1
                 new_x_coordinate *= -1
+            else:
+                print("Error: No rotation")
             self.home_coordinates = (new_x_coordinate, new_y_coordinate)
+
         elif action == Action.MOVE_FORWARD:
             new_y_coordinate = self.home_coordinates[Y_COORDINATE] - 1
             new_x_coordinate = self.home_coordinates[X_COORDINATE]
             self.home_coordinates = (new_x_coordinate, new_y_coordinate)
 
     def update_last_dropped_package_coordinates(self, action):
-
-        if self.agent_id == 1:
-            print(f"Old dropped payload : {self.dropped_payload_coordinates}")
 
         if action == Action.TURN_LEFT:
             new_x_coordinate = abs(self.dropped_payload_coordinates[Y_COORDINATE])
@@ -164,16 +168,9 @@ class Agent:
 
             self.dropped_payload_coordinates = (new_x_coordinate, new_y_coordinate)
         elif action == Action.MOVE_FORWARD:
-            if self.agent_id == 1:
-                print(f"###Assistant agent : {self.state}")
-                print(f"###Assistant agent : {action}")
-                print(f"Moving Forward : {self.dropped_payload_coordinates}")
             new_y_coordinate = self.dropped_payload_coordinates[Y_COORDINATE] - 1
             new_x_coordinate = self.dropped_payload_coordinates[X_COORDINATE]
             self.dropped_payload_coordinates = (new_x_coordinate, new_y_coordinate)
-
-        if self.agent_id == 1:
-            print(f"New dropped payload : {self.dropped_payload_coordinates}")
 
     def has_payload(self, response):
         data = json.loads(response.text)

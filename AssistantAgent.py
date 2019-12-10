@@ -37,7 +37,7 @@ class AssistantAgent(Agent):
                 self.state = AgentState.AVOID_OBJECT
 
         elif self.state == AgentState.MOVE_TO_AGENT:
-            if not self.has_agent_coordinates(response):
+            if not self.has_target_agent_coordinates(response):
                 action = Action.IDLE
                 self.state = AgentState.SEARCH_AGENT
             else:
@@ -92,8 +92,8 @@ class AssistantAgent(Agent):
 
         if self.dropped_payload_coordinates:
             self.update_last_dropped_package_coordinates(action)
-        print(f"Assistant agent : {self.state}")
-        print(f"Assistant agent : {action}")
+        #print(f"Assistant agent : {self.state}")
+        #print(f"Assistant agent : {action}")
 
         self.action(action)
 
