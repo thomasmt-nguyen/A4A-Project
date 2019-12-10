@@ -2,8 +2,9 @@ from enum import Enum
 
 
 class AvoidState(Enum):
-    TURN = 0
-    MOVE = 1
-    CORRECT = 2
-    WAIT = 3
-    COMPLETE = 4
+    CALCULATE = 0
+    TURN = 1
+    MOVE = 2
+    CORRECT = 3
+    WAIT = 4
+    COMPLETE = 5

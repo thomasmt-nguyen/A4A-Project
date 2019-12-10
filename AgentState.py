@@ -6,4 +6,7 @@ class AgentState(Enum):
     SEARCH_HOME = 1
     RETRIEVE_PAYLOAD = 2
     SEARCH_PAYLOAD = 3
-    AVOID_OBJECT = 4
+    WAIT_FOR_PAYLOAD = 4
+    SEARCH_AGENT = 5
+    MOVE_TO_AGENT = 6
+    AVOID_OBJECT = 7
