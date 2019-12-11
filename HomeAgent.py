@@ -1,7 +1,6 @@
 from Action import Action
 from Agent import Agent
 from AgentState import AgentState
-from AvoidState import AvoidState
 
 X_COORDINATE = 0
 Y_COORDINATE = 1
@@ -21,7 +20,7 @@ class HomeAgent(Agent):
         self.state = AgentState.SEARCH_HOME
         self.saved_state = AgentState.SEARCH_HOME
 
-    def do_stuff(self):
+    def execute(self):
         response = self.proxy.agent_status(agent_id=self.agent_id)
 
         if self.state == AgentState.SEARCH_HOME:
@@ -62,7 +61,6 @@ class HomeAgent(Agent):
                 action = self.calculate_retrieve_payload_action(response)
                 if action == Action.COMPLETE:
                     action = Action.PICK_UP
-                    print("picked up package")
                     self.state = AgentState.SEARCH_HOME
                 elif action == Action.AVOID_OBJECT:
                     action = action.IDLE
@@ -89,8 +87,6 @@ class HomeAgent(Agent):
             coordinates = self.get_closest_payload_coordinates(response)
             if coordinates == DIRECTLY_IN_FRONT:
                 action = Action.COMPLETE
-            # Payload in front or behind agent
-            # Payload left of right of agent or behind
             elif coordinates[X_COORDINATE] >= 0:
                 action = Action.TURN_RIGHT
             elif coordinates[X_COORDINATE] < 0:

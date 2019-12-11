@@ -23,7 +23,7 @@ class AssistantAgent(Agent):
         self.state = AgentState.SEARCH_AGENT
         self.saved_state = AgentState.SEARCH_AGENT
 
-    def do_stuff(self):
+    def execute(self):
         response = self.proxy.agent_status(agent_id=self.agent_id)
 
         if self.state == AgentState.SEARCH_AGENT:

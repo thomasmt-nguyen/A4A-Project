@@ -21,7 +21,7 @@ class ScoutAgent(Agent):
         self.state = AgentState.SEARCH_PAYLOAD
         self.saved_state = AgentState.SEARCH_PAYLOAD
 
-    def do_stuff(self):
+    def execute(self):
 
         response = self.proxy.agent_status(agent_id=self.agent_id)
 
@@ -92,15 +92,10 @@ class ScoutAgent(Agent):
             #self.update_home_coordinates(action)
 
         if self.dropped_payload_coordinates:
-
             self.update_last_dropped_package_coordinates(action)
-            x = self.dropped_payload_coordinates[0]
-            y = self.dropped_payload_coordinates[1]
-            print(f'Old Saved Coordinate: {x}, {y}')
-
             for saved_coordinate in self.saved_coordinates:
                 saved_coordinate.update(action)
-                #print(f'Saved Coordinate: {saved_coordinate.x}, {saved_coordinate.y}')
+
         #print(f"Scout agent : {self.state}")
         #print(f"Scout agent : {action}")
         self.action(action)

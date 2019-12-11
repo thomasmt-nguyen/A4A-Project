@@ -27,8 +27,9 @@ class Agent:
         self.dropped_payload_coordinates = ()
         self.saved_coordinates = list()
         self.in_position = False
+        self.completeded_packages = 0
 
-    def do_stuff(self):
+    def execute(self):
 
         response = self.proxy.agent_status(self.agent_id)
 
@@ -73,6 +74,7 @@ class Agent:
             if action == Action.COMPLETE:
                 action = Action.DROP
                 self.state = AgentState.SEARCH_PAYLOAD
+                self.completeded_packages += 1
             elif action == Action.AVOID_OBJECT:
                 action = action.IDLE
                 self.saved_state = self.state
@@ -87,8 +89,8 @@ class Agent:
         #if self.has_home_coordinates(response):
             #self.update_home_coordinates(action)
 
-        print(f"{self.agent_id}: {self.state}")
-        print(f"{self.agent_id}: {action}")
+        #print(f"{self.agent_id}: {self.state}")
+        #print(f"{self.agent_id}: {action}")
         self.action(action)
 
     def update_home_coordinates(self, action):
