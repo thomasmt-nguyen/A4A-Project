@@ -46,6 +46,7 @@ class AssistantAgent(Agent):
                 action = self.calculate_move_to_agent_action(response, coordinates)
                 if action == Action.COMPLETE and self.has_payload(response):
                     action = Action.DROP
+                    self.increment_completion()
                     self.state = AgentState.WAIT_FOR_PAYLOAD
                     self.dropped_payload_coordinates = DIRECTLY_IN_FRONT
                 elif action == Action.COMPLETE and not self.has_payload(response):
@@ -133,10 +134,10 @@ class AssistantAgent(Agent):
     def calculate_search_for_agent_action(self, response):
         if self.has_target_agent_coordinates(response):
             action = Action.COMPLETE
-        elif self.has_wall_in_distance(response, 'F') and self.has_wall_in_distance(response, 'L'):
-            action = Action.TURN_RIGHT
-        elif self.has_wall_in_distance(response, 'F'):
+        elif self.has_wall_in_distance(response, 'F') and self.has_wall_in_distance(response, 'R'):
             action = Action.TURN_LEFT
+        elif self.has_wall_in_distance(response, 'F'):
+            action = Action.TURN_RIGHT
         elif self.has_possible_collision(response):
             action = Action.AVOID_OBJECT
         else:

@@ -14,6 +14,7 @@ DIRECTLY_RIGHT = (1, 0)
 CORNER_RIGHT = (1, 1)
 CORNER_LEFT = (-1, 1)
 AGENT_SCAN_DISTANCE = 1
+DEFAULT_IDLE = 2
 
 class ScoutAgent(Agent):
     def __init__(self, proxy, agent_id):
@@ -34,6 +35,7 @@ class ScoutAgent(Agent):
                 action = action.IDLE
                 self.saved_state = self.state
                 self.state = AgentState.AVOID_OBJECT
+
 
         elif self.state == AgentState.RETRIEVE_PAYLOAD:
             if not self.has_new_payload_coordinates(response):
@@ -60,7 +62,6 @@ class ScoutAgent(Agent):
                 self.saved_state = self.state
                 self.state = AgentState.AVOID_OBJECT
 
-
         elif self.state == AgentState.MOVE_TO_AGENT:
             if not self.has_target_agent_coordinates(response):
                 action = Action.IDLE
@@ -72,15 +73,19 @@ class ScoutAgent(Agent):
                 if action == Action.COMPLETE:
                     action = Action.DROP
                     self.dropped_payload_coordinates = DIRECTLY_IN_FRONT
+                    self.increment_completion()
+                    #self.idle_time = 2
                     # Add home coordinates
-                    print(f'{self.dropped_payload_coordinates}')
-                    saved_coordinate = SavedCoordinate(DIRECTLY_IN_FRONT, "DROPPED")
-                    self.saved_coordinates.append(saved_coordinate)
+                    #saved_coordinate = SavedCoordinate(DIRECTLY_IN_FRONT, "DROPPED")
+                    #self.saved_coordinates.append(saved_coordinate)
                     self.state = AgentState.SEARCH_PAYLOAD
                 elif action == Action.AVOID_OBJECT:
                     action = action.IDLE
                     self.saved_state = self.state
                     self.state = AgentState.AVOID_OBJECT
+
+            #if self.has_payload_coordinates(response):
+                #self.save_payload_coordinates(response)
 
         elif self.state == AgentState.AVOID_OBJECT:
             action = self.calculate_avoid_object_action(response)
@@ -88,17 +93,24 @@ class ScoutAgent(Agent):
                 action = action.IDLE
                 self.state = self.saved_state
 
-        #if self.has_home_coordinates(response):
-            #self.update_home_coordinates(action)
+        #if self.saved_coordinates:
+            #for saved_coordinate in self.saved_coordinates:
+                #print(saved_coordinate)
+                #saved_coordinate.update(action)
 
         if self.dropped_payload_coordinates:
             self.update_last_dropped_package_coordinates(action)
-            for saved_coordinate in self.saved_coordinates:
-                saved_coordinate.update(action)
 
-        #print(f"Scout agent : {self.state}")
-        #print(f"Scout agent : {action}")
+        print(f"Scout agent : {self.state}")
+        print(f"Scout agent : {action}")
         self.action(action)
+
+    def save_payload_coordinates(self, response):
+        coordinates = self.get_payload_coordinates(response)
+        coordinate = SavedCoordinate(coordinates, "payload")
+        print(f'saved coordinates at {coordinate.x}, {coordinate.y}')
+        self.saved_coordinates.append(coordinate)
+        print(self.saved_coordinates)
 
     def calculate_move_to_agent_action(self, response, coordinates):
 
@@ -143,6 +155,22 @@ class ScoutAgent(Agent):
             action = Action.AVOID_OBJECT
         else:
             action = Action.MOVE_FORWARD
+
+        return action
+
+    def calculate_search_payload_action(self, response):
+
+        if self.has_payload_coordinates(response):
+            action = Action.COMPLETE
+        elif self.has_wall_in_distance(response, 'F') and self.has_wall_in_distance(response, 'L'):
+            action = Action.TURN_RIGHT
+        elif self.has_wall_in_distance(response, 'F'):
+            action = Action.TURN_LEFT
+        else:
+            action = Action.MOVE_FORWARD
+
+        if action == Action.MOVE_FORWARD and self.has_possible_collision(response):
+            action = Action.AVOID_OBJECT
 
         return action
 

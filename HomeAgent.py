@@ -38,6 +38,7 @@ class HomeAgent(Agent):
             action = self.calculate_return_home_action(response, coordinates)
             if action == Action.COMPLETE and self.has_payload(response):
                 action = Action.DROP
+                self.increment_completion()
                 self.state = AgentState.WAIT_FOR_PAYLOAD
             elif action == Action.COMPLETE and not self.has_payload(response):
                 action = Action.IDLE

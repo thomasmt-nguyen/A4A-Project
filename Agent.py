@@ -27,7 +27,8 @@ class Agent:
         self.dropped_payload_coordinates = ()
         self.saved_coordinates = list()
         self.in_position = False
-        self.completeded_packages = 0
+        self.completeded_payloads = 0
+        self.idle_time = 0
 
     def execute(self):
 
@@ -74,7 +75,7 @@ class Agent:
             if action == Action.COMPLETE:
                 action = Action.DROP
                 self.state = AgentState.SEARCH_PAYLOAD
-                self.completeded_packages += 1
+                self.increment_completion()
             elif action == Action.AVOID_OBJECT:
                 action = action.IDLE
                 self.saved_state = self.state
@@ -92,6 +93,9 @@ class Agent:
         #print(f"{self.agent_id}: {self.state}")
         #print(f"{self.agent_id}: {action}")
         self.action(action)
+
+    def increment_completion(self):
+        self.completeded_payloads += 1
 
     def update_home_coordinates(self, action):
 
@@ -286,15 +290,15 @@ class Agent:
     def calculate_turn_action(self, response):
 
         if self.has_object_at_coordinate(response, DIRECTLY_IN_FRONT):
-            if self.has_object_at_coordinate(response, DIRECTLY_LEFT) or self.has_wall_in_distance(response, 'L'):
+            if self.has_object_at_coordinate(response, DIRECTLY_LEFT) or self.has_wall_in_distance(response, 'L') or self.has_object_at_coordinate(response, CORNER_LEFT):
                 action = Action.TURN_RIGHT
                 self.saved_avoid_action = Action.TURN_RIGHT
-            elif self.has_object_at_coordinate(response, DIRECTLY_RIGHT) or self.has_wall_in_distance(response, 'R'):
+            elif self.has_object_at_coordinate(response, DIRECTLY_RIGHT) or self.has_wall_in_distance(response, 'R') or self.has_object_at_coordinate(response, CORNER_RIGHT):
                 action = Action.TURN_LEFT
                 self.saved_avoid_action = Action.TURN_LEFT
             else:
                 action = Action.TURN_RIGHT
-                self.saved_avoid_action = Action.TURN_RIGHT
+                self.saved_avoid_action = Action.TURN_LEFT
         else:
             action = Action.IDLE
             self.saved_avoid_action = Action.IDLE
