@@ -1,5 +1,4 @@
 import requests
-import json
 
 server_url = "https://island_of_agents.atke.a.intuit.com/xanadu"
 headers = {
