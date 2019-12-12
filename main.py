@@ -3,6 +3,7 @@ from DataProxy import DataProxy
 from SimulationEnvironment import SimulationEnvironment
 import json
 
+
 app = Flask(__name__)
 dataProxy = DataProxy()
 environment = SimulationEnvironment()
@@ -40,3 +41,64 @@ if __name__ == '__main__':
 
 
 
+'''
+from SimulationProxy import ServerProxy
+from ScoutAgent import ScoutAgent
+from HomeAgent import HomeAgent
+from Action import Action
+
+proxy = ServerProxy("Test2")
+agent1 = ScoutAgent(proxy, agent_id=0)
+agent2 = HomeAgent(proxy, agent_id=1)
+agent_list = list()
+agent_list.extend((agent1, agent2))
+agent1.action(Action.TURN_RIGHT)
+agent2.action(Action.MOVE_FORWARD)
+proxy.step()
+agent1.action(Action.MOVE_FORWARD)
+agent2.action(Action.MOVE_FORWARD)
+proxy.step()
+agent1.action(Action.MOVE_FORWARD)
+agent2.action(Action.MOVE_FORWARD)
+proxy.step()
+
+agent1.action(Action.TURN_LEFT)
+agent2.action(Action.MOVE_FORWARD)
+proxy.step()
+agent1.action(Action.MOVE_FORWARD)
+agent2.action(Action.MOVE_FORWARD)
+proxy.step()
+agent1.action(Action.MOVE_FORWARD)
+agent2.action(Action.MOVE_FORWARD)
+proxy.step()
+agent1.action(Action.MOVE_FORWARD)
+agent2.action(Action.TURN_RIGHT)
+proxy.step()
+agent1.action(Action.TURN_LEFT)
+agent2.action(Action.MOVE_FORWARD)
+proxy.step()
+agent1.action(Action.MOVE_FORWARD)
+agent2.action(Action.IDLE)
+proxy.step()
+agent1.action(Action.MOVE_FORWARD)
+agent2.action(Action.IDLE)
+proxy.step()
+agent1.action(Action.MOVE_FORWARD)
+agent2.action(Action.IDLE)
+proxy.step()
+agent1.action(Action.MOVE_FORWARD)
+agent2.action(Action.IDLE)
+proxy.step()
+agent1.action(Action.TURN_LEFT)
+agent2.action(Action.TURN_RIGHT)
+proxy.step()
+agent1.action(Action.MOVE_FORWARD)
+agent2.action(Action.MOVE_FORWARD)
+proxy.step()
+agent1.action(Action.MOVE_FORWARD)
+agent2.action(Action.IDLE)
+proxy.step()
+agent1.action(Action.TURN_LEFT)
+agent2.action(Action.MOVE_FORWARD)
+proxy.step()
+'''

@@ -102,8 +102,8 @@ class ScoutAgent(Agent):
         if self.dropped_payload_coordinates:
             self.update_last_dropped_package_coordinates(action)
 
-        print(f"Scout agent : {self.state}")
-        print(f"Scout agent : {action}")
+        # print(f"Scout agent : {self.state}")
+        # print(f"Scout agent : {action}")
         self.action(action)
         self.last_action = action
 

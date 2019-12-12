@@ -89,11 +89,11 @@ class Agent:
                 action = action.IDLE
                 self.state = self.saved_state
 
-        #if self.has_home_coordinates(response):
-            #self.update_home_coordinates(action)
+        # if self.has_home_coordinates(response):
+        # self.update_home_coordinates(action)
 
-        #print(f"{self.agent_id}: {self.state}")
-        #print(f"{self.agent_id}: {action}")
+        # print(f"{self.agent_id}: {self.state}")
+        # print(f"{self.agent_id}: {action}")
         self.action(action)
         self.last_action = action
 
@@ -146,14 +146,18 @@ class Agent:
         if action == Action.TURN_LEFT:
             new_x_coordinate = abs(self.dropped_payload_coordinates[Y_COORDINATE])
             new_y_coordinate = abs(self.dropped_payload_coordinates[X_COORDINATE])
-            if self.dropped_payload_coordinates[X_COORDINATE] > 0 and self.dropped_payload_coordinates[Y_COORDINATE] >= 0:
+            if self.dropped_payload_coordinates[X_COORDINATE] > 0 and self.dropped_payload_coordinates[
+                Y_COORDINATE] >= 0:
                 new_y_coordinate *= -1
-            elif self.dropped_payload_coordinates[X_COORDINATE] <= 0 and self.dropped_payload_coordinates[Y_COORDINATE] > 0:
+            elif self.dropped_payload_coordinates[X_COORDINATE] <= 0 and self.dropped_payload_coordinates[
+                Y_COORDINATE] > 0:
                 new_y_coordinate *= 1
                 new_x_coordinate *= 1
-            elif self.dropped_payload_coordinates[X_COORDINATE] < 0 and self.dropped_payload_coordinates[Y_COORDINATE] <= 0:
+            elif self.dropped_payload_coordinates[X_COORDINATE] < 0 and self.dropped_payload_coordinates[
+                Y_COORDINATE] <= 0:
                 new_x_coordinate *= -1
-            elif self.dropped_payload_coordinates[X_COORDINATE] >= 0 and self.dropped_payload_coordinates[Y_COORDINATE] < 0:
+            elif self.dropped_payload_coordinates[X_COORDINATE] >= 0 and self.dropped_payload_coordinates[
+                Y_COORDINATE] < 0:
                 new_y_coordinate *= -1
                 new_x_coordinate *= -1
             else:
@@ -162,14 +166,18 @@ class Agent:
         elif action == Action.TURN_RIGHT:
             new_x_coordinate = abs(self.dropped_payload_coordinates[Y_COORDINATE])
             new_y_coordinate = abs(self.dropped_payload_coordinates[X_COORDINATE])
-            if self.dropped_payload_coordinates[X_COORDINATE] >= 0 and self.dropped_payload_coordinates[Y_COORDINATE] > 0:
+            if self.dropped_payload_coordinates[X_COORDINATE] >= 0 and self.dropped_payload_coordinates[
+                Y_COORDINATE] > 0:
                 new_x_coordinate *= -1
-            elif self.dropped_payload_coordinates[X_COORDINATE] > 0 and self.dropped_payload_coordinates[Y_COORDINATE] <= 0:
+            elif self.dropped_payload_coordinates[X_COORDINATE] > 0 and self.dropped_payload_coordinates[
+                Y_COORDINATE] <= 0:
                 new_y_coordinate *= 1
                 new_x_coordinate *= 1
-            elif self.dropped_payload_coordinates[X_COORDINATE] <= 0 and self.dropped_payload_coordinates[Y_COORDINATE] < 0:
+            elif self.dropped_payload_coordinates[X_COORDINATE] <= 0 and self.dropped_payload_coordinates[
+                Y_COORDINATE] < 0:
                 new_y_coordinate *= -1
-            elif self.dropped_payload_coordinates[X_COORDINATE] < 0 and self.dropped_payload_coordinates[Y_COORDINATE] >= 0:
+            elif self.dropped_payload_coordinates[X_COORDINATE] < 0 and self.dropped_payload_coordinates[
+                Y_COORDINATE] >= 0:
                 new_y_coordinate *= -1
                 new_x_coordinate *= -1
             else:
@@ -283,25 +291,28 @@ class Agent:
         return action
 
     def calculate_avoid_action(self, response):
-        if self.has_object_at_coordinate(response, DIRECTLY_IN_FRONT):
+
+        if self.has_object_at_coordinate(response, DIRECTLY_IN_FRONT) or self.has_possible_agent_collision(response):
             self.avoid_state = AvoidState.TURN
         else:
             self.avoid_state = AvoidState.MOVE
 
-
-
     def calculate_turn_action(self, response):
 
         if self.has_object_at_coordinate(response, DIRECTLY_IN_FRONT):
-            if self.has_object_at_coordinate(response, DIRECTLY_LEFT) or self.has_wall_in_distance(response, 'L') or self.has_object_at_coordinate(response, CORNER_LEFT):
+            if self.has_object_at_coordinate(response, DIRECTLY_LEFT) or self.has_wall_in_distance(response,
+                                                                                                   'L') or self.has_object_at_coordinate(
+                    response, CORNER_LEFT):
                 action = Action.TURN_RIGHT
                 self.saved_avoid_action = Action.TURN_RIGHT
-            elif self.has_object_at_coordinate(response, DIRECTLY_RIGHT) or self.has_wall_in_distance(response, 'R') or self.has_object_at_coordinate(response, CORNER_RIGHT):
+            elif self.has_object_at_coordinate(response, DIRECTLY_RIGHT) or self.has_wall_in_distance(response,
+                                                                                                      'R') or self.has_object_at_coordinate(
+                    response, CORNER_RIGHT):
                 action = Action.TURN_LEFT
                 self.saved_avoid_action = Action.TURN_LEFT
             else:
                 action = Action.TURN_RIGHT
-                self.saved_avoid_action = Action.TURN_LEFT
+                self.saved_avoid_action = Action.TURN_RIGHT
         else:
             action = Action.IDLE
             self.saved_avoid_action = Action.IDLE
@@ -342,7 +353,7 @@ class Agent:
         else:
             action = Action.IDLE
 
-        #TODO: if left has wall in it and no payload over there, go straight or go right
+        # TODO: if left has wall in it and no payload over there, go straight or go right
 
         return action
 
@@ -440,14 +451,14 @@ class Agent:
         self.proxy.agent_action(agent_id=self.agent_id, action=action.action_value, mode=mode)
 
     def write_mode(self, action):
-        mode = action.bit | (self.agent_id << 3) | (self.in_position << 6)
+        mode = self.state.value | (self.agent_id << 3) | (self.in_position << 6)
         return mode
 
     def read_mode(self, mode):
         agent_state = mode & 7
         agent_id = mode >> 3 & 7
         agent_in_position = mode >> 6 & 1
-        agent_status = AgentStatus(agent_id = agent_id, agent_state=agent_state, agent_in_position=agent_in_position)
+        agent_status = AgentStatus(agent_id=agent_id, agent_state=agent_state, agent_in_position=agent_in_position)
         return agent_status
 
     def get_closest_payload_coordinates(self, response):
@@ -483,15 +494,15 @@ class Agent:
 
     def get_home_coordinates(self, response):
         data = json.loads(response.text)
-        #if data['agentData']['Scan']['Home']:
+        # if data['agentData']['Scan']['Home']:
         #    print(f" the actual home coordinates{tuple(data['agentData']['Scan']['Home'][0])}")
         #    print(f" the stored home coordinates{self.home_coordinates}")
 
-        #if data['agentData']['Scan']['Home']:
+        # if data['agentData']['Scan']['Home']:
         data = json.loads(response.text)
         return tuple(data['agentData']['Scan']['Home'][0])
 
-        #return self.home_coordinates
+        # return self.home_coordinates
 
     def has_payload_coordinates(self, response):
         data = json.loads(response.text)
@@ -508,10 +519,12 @@ class Agent:
         else:
             return False
 
+
+
     def has_home_coordinates(self, response):
 
         data = json.loads(response.text)
-        if data['agentData']['Scan']['Home']: #or self.home_coordinates:
+        if data['agentData']['Scan']['Home']:  # or self.home_coordinates:
             return True
         else:
             return False
@@ -527,12 +540,9 @@ class Agent:
     def has_possible_collision(self, response):
 
         # Finish this part later
-        '''if self.has_possible_agent_collision(response):
+        if self.has_possible_agent_collision(response):
             return True
-        else:
-            return self.has_object_at_coordinate(response, DIRECTLY_IN_FRONT)'''
 
-        has_object = self.has_object_at_coordinate(response, DIRECTLY_IN_FRONT)
         return self.has_object_at_coordinate(response, DIRECTLY_IN_FRONT)
 
     def has_possible_agent_collision(self, response):
@@ -541,22 +551,22 @@ class Agent:
         if self.has_agent_at_coordinate(dictionary, CORNER_LEFT):
             agent = dictionary[CORNER_LEFT]
             agent_status = self.read_mode(agent['Status'])
-
-            if agent['Heading'] == 'R' and agent_status.agent_state == Action.MOVE_FORWARD:
+            if agent['Heading'] == 'R' and (agent_status.agent_state == Action.MOVE_FORWARD.bit
+                                            or agent_status.agent_state == Action.AVOID_OBJECT.bit):
                 return True
 
         if self.has_agent_at_coordinate(dictionary, CORNER_RIGHT):
             agent = dictionary[CORNER_RIGHT]
             agent_status = self.read_mode(agent['Status'])
-
-            if agent['Heading'] == 'L' and agent_status.agent_state == Action.MOVE_FORWARD:
+            if agent['Heading'] == 'L' and (agent_status.agent_state == Action.MOVE_FORWARD.bit
+                                            or agent_status.agent_state == Action.AVOID_OBJECT.bit):
                 return True
 
         if self.has_agent_at_coordinate(dictionary, IN_FRONT):
             agent = dictionary[IN_FRONT]
             agent_status = self.read_mode(agent['Status'])
-
-            if agent['Heading'] == 'B' and agent_status.agent_state == Action.MOVE_FORWARD:
+            if agent['Heading'] == 'B' and (agent_status.agent_state == Action.MOVE_FORWARD.bit
+                                            or agent_status.agent_state == Action.AVOID_OBJECT.bit):
                 return True
 
     def has_object_at_coordinate(self, response, coordinate):
