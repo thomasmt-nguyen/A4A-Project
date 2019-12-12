@@ -21,6 +21,7 @@ class ScoutAgent(Agent):
         Agent.__init__(self, proxy, agent_id)
         self.state = AgentState.SEARCH_PAYLOAD
         self.saved_state = AgentState.SEARCH_PAYLOAD
+        self.type = "Scout"
 
     def execute(self):
 
@@ -104,6 +105,7 @@ class ScoutAgent(Agent):
         print(f"Scout agent : {self.state}")
         print(f"Scout agent : {action}")
         self.action(action)
+        self.last_action = action
 
     def save_payload_coordinates(self, response):
         coordinates = self.get_payload_coordinates(response)

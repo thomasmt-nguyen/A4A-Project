@@ -19,6 +19,7 @@ class HomeAgent(Agent):
         Agent.__init__(self, proxy, agent_id)
         self.state = AgentState.SEARCH_HOME
         self.saved_state = AgentState.SEARCH_HOME
+        self.type = "Home"
 
     def execute(self):
         response = self.proxy.agent_status(agent_id=self.agent_id)
@@ -81,6 +82,7 @@ class HomeAgent(Agent):
         #print(f"Home agent : {action}")
 
         self.action(action)
+        self.last_action = action
 
     def calculate_retrieve_payload_action(self, response):
 

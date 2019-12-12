@@ -29,6 +29,8 @@ class Agent:
         self.in_position = False
         self.completeded_payloads = 0
         self.idle_time = 0
+        self.type = "Basic"
+        self.last_action = Action.IDLE
 
     def execute(self):
 
@@ -93,6 +95,7 @@ class Agent:
         #print(f"{self.agent_id}: {self.state}")
         #print(f"{self.agent_id}: {action}")
         self.action(action)
+        self.last_action = action
 
     def increment_completion(self):
         self.completeded_payloads += 1

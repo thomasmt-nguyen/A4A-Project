@@ -22,6 +22,7 @@ class AssistantAgent(Agent):
         Agent.__init__(self, proxy, agent_id)
         self.state = AgentState.SEARCH_AGENT
         self.saved_state = AgentState.SEARCH_AGENT
+        self.type = "Assistant"
 
     def execute(self):
         response = self.proxy.agent_status(agent_id=self.agent_id)
@@ -97,6 +98,7 @@ class AssistantAgent(Agent):
         #print(f"Assistant agent : {action}")
 
         self.action(action)
+        self.last_action = action
 
     def calculate_move_to_agent_action(self, response, coordinates):
 
